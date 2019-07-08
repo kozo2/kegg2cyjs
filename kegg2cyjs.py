@@ -9,6 +9,77 @@ __license__ = 'MIT'
 
 API_BASE = 'http://rest.kegg.jp/'
 
+KEGGSTYLE = [ {
+  "format_version" : "1.0",
+  "generated_by" : "cytoscape-3.7.1",
+  "target_cytoscapejs_version" : "~2.1",
+  "title" : "keggstyle",
+  "style" : [ {
+    "selector" : "node",
+    "css" : {
+      "font-family" : "Dialog.plain",
+      "font-weight" : "normal",
+      "border-width" : 3.0,
+      "shape" : "roundrectangle",
+      "font-size" : 12,
+      "color" : "rgb(51,51,51)",
+      "border-opacity" : 1.0,
+      "text-valign" : "center",
+      "text-halign" : "center",
+      "background-opacity" : 1.0,
+      "text-opacity" : 1.0,
+      "border-color" : "data(fgcolor)",
+      "width" : "data(width)",
+      "content" : "data(name)",
+      "background-color" : "data(bgcolor)",
+      "height" : "data(height)"
+    }
+  }, {
+    "selector" : "node[type = 'rectangle']",
+    "css" : {
+      "shape" : "rectangle"
+    }
+  }, {
+    "selector" : "node[type = 'circle']",
+    "css" : {
+      "shape" : "ellipse"
+    }
+  }, {
+    "selector" : "node[type = 'roundrectangle']",
+    "css" : {
+      "shape" : "roundrectangle"
+    }
+  }, {
+    "selector" : "node:selected",
+    "css" : {
+      "background-color" : "rgb(255,255,0)"
+    }
+  }, {
+    "selector" : "edge",
+    "css" : {
+      "source-arrow-shape" : "none",
+      "font-size" : 10,
+      "width" : 3.0,
+      "font-family" : "Dialog.plain",
+      "font-weight" : "normal",
+      "target-arrow-color" : "rgb(0,0,0)",
+      "color" : "rgb(0,0,0)",
+      "content" : "",
+      "text-opacity" : 1.0,
+      "line-color" : "rgb(102,102,102)",
+      "source-arrow-color" : "rgb(0,0,0)",
+      "opacity" : 1.0,
+      "line-style" : "solid",
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge:selected",
+    "css" : {
+      "line-color" : "rgb(255,0,0)"
+    }
+  } ]
+} ]
+
 def kegg2cyjs(identifier):
     kgml = requests.get(API_BASE + 'get/' + identifier + '/kgml').content
     soup = BeautifulSoup(kgml, "xml")
