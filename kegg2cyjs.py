@@ -104,18 +104,46 @@ def kegg2cyjs(identifier):
         data["height"] = g["height"]
         node = {"data":data, "position":{"x":int(g["x"]), "y":int(g["y"])}, "selected":"false"}
         nodes.append(node)
+
     relations = soup.find_all('relation')
+    s2t = []
     for rel in relations:
         stype = rel.find("subtype")
+        # data1 = {}        
+        # data1["source"] = stype["value"]
+        # data1["target"] = rel["entry1"]
+        s2t.append([stype["value"], rel["entry1"]])
+        # data1["type"] = rel["type"]
+        # edge = {"data":data1}
+        # edges.append(edge)
+        # data2 = {}
+        # data2["source"] = stype["value"]
+        # data2["target"] = rel["entry2"]
+        s2t.append([stype["value"], rel["entry2"]])
+        # edge = {"data":data2}
+        # edges.append(edge)
+
+    reactions = soup.find_all('reaction')
+    for rea in reactions:
+        substrates = rea.find_all('substrate')
+        products = rea.find_all('product')
+        for s in substrates:
+            s2t.append([s['id'], rea['id']])
+            for p in products:
+                s2t.append([rea['id'], p['id']])
+                # data = {}
+                # data['source'] = s['id']
+                # data['target'] = p['id']
+                # edge = {'data': data}
+                # edges.append(edge)
+
+    for st in set(frozenset(i) for i in s2t):
         data = {}
-        data["source"] = stype["value"]
-        data["target"] = rel["entry1"]
-        data["type"] = rel["type"]
-        edge = {"data":data}
+        data['source'] = list(st)[0]
+        data['target'] = list(st)[1]
+        edge = {'data':data}
         edges.append(edge)
-        data["target"] = rel["entry2"]
-        edge = {"data":data}
-        edges.append(edge)
+
     elements["nodes"] = nodes
     elements["edges"] = edges
     d["elements"] = elements
