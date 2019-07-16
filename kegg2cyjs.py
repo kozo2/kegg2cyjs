@@ -144,7 +144,8 @@ def kegg2cyjs(identifier):
         edge = {'data':data}
         edges.append(edge)
 
-    elements["nodes"] = nodes
-    elements["edges"] = edges
-    d["elements"] = elements
-    return json.dumps(d, indent=4)
+    # elements["nodes"] = nodes
+    # elements["edges"] = edges
+    # d["elements"] = elements
+    # return json.dumps(d, indent=4)
+    return nodes + edges
