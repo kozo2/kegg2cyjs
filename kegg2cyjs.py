@@ -2,6 +2,8 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
+import pandas as pd
+
 __author__ = 'Kozo Nishida'
 __email__ = 'knishida@riken.jp'
 __version__ = '0.0.1'
@@ -144,8 +146,14 @@ def kegg2cyjs(identifier):
         edge = {'data':data}
         edges.append(edge)
 
-    # elements["nodes"] = nodes
-    # elements["edges"] = edges
+    elements["nodes"] = nodes
+    elements["edges"] = edges
     # d["elements"] = elements
     # return json.dumps(d, indent=4)
-    return nodes + edges
+    return elements
+
+def nodes2df(nodes):
+    rows = []
+    for n in nodes:
+        rows.append(pd.Series(n['data']))
+    return pd.DataFrame(rows)
