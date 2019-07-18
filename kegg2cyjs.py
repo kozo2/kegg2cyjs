@@ -167,9 +167,29 @@ def global2cyjs(soup):
         node = {'data':data, 'position':{'x':int(g['x']), 'y':int(g['y'])}, 'selected': 'false'}
         nodes.append(node)
     elements['nodes'] = nodes
+
+    s2t = []
     for r in reactions:
-        
+        substrates = r.find_all('substrate')
+        products = r.find_all('product')
+        rids = r["name"].replace("rn:", "")
+        data = {}
+        for s in substrates:
+            for p in products:
+                s2t.append([s['id'], p['id']])
+                # data['source'] = s['id']
+                # data['target'] = p['id']
+                # edge = {'data':data}
+                # edges.append(edge)
+    
+    for st in set(frozenset(i) for i in s2t):
+        data = {}
+        data['source'] = list(st)[0]
+        data['target'] = list(st)[1]
+        edge = {'data':data}
+        edges.append(edge)
     elements['edges'] = edges
+
     return elements
     # print(len(entries))
     # print(len(reactions))
