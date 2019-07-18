@@ -11,7 +11,9 @@ __license__ = 'MIT'
 
 API_BASE = 'http://rest.kegg.jp/'
 
-KEGGSTYLE = [ {
+GLOBAL_PATHWAY_IDS = ("01100", "01110", "01120", "01130")
+
+KEGG_STYLE = [ {
   "format_version" : "1.0",
   "generated_by" : "cytoscape-3.7.1",
   "target_cytoscapejs_version" : "~2.1",
@@ -82,14 +84,108 @@ KEGGSTYLE = [ {
   } ]
 } ]
 
+KEGG_GLOBAL_STYLE = [ {
+  "format_version" : "1.0",
+  "generated_by" : "cytoscape-3.7.1",
+  "target_cytoscapejs_version" : "~2.1",
+  "title" : "KEGG global style",
+  "style" : [ {
+    "selector" : "node",
+    "css" : {
+      "font-size" : 12,
+      "shape" : "ellipse",
+      "content" : "",
+      "border-color" : "rgb(0,0,0)",
+      "background-opacity" : 1.0,
+      "text-opacity" : 1.0,
+      "color" : "rgb(0,0,0)",
+      "border-opacity" : 1.0,
+      "text-valign" : "center",
+      "text-halign" : "center",
+      "border-width" : 2.0,
+      "font-family" : "SansSerif.plain",
+      "font-weight" : "normal",
+      "width" : "data(width)",
+      "background-color" : "data(bgcolor)",
+      "height" : "data(height)"
+    }
+  }, {
+    "selector" : "node[type = 'circle']",
+    "css" : {
+      "shape" : "ellipse"
+    }
+  }, {
+    "selector" : "node:selected",
+    "css" : {
+      "background-color" : "rgb(255,255,0)"
+    }
+  }, {
+    "selector" : "edge",
+    "css" : {
+      "opacity" : 1.0,
+      "line-style" : "solid",
+      "source-arrow-shape" : "none",
+      "font-size" : 10,
+      "width" : 1.0,
+      "text-opacity" : 1.0,
+      "target-arrow-shape" : "none",
+      "line-color" : "rgb(64,64,64)",
+      "content" : "",
+      "source-arrow-color" : "rgb(0,0,0)",
+      "font-family" : "SansSerif.plain",
+      "font-weight" : "normal",
+      "color" : "rgb(0,0,0)",
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge:selected",
+    "css" : {
+      "line-color" : "rgb(255,0,0)"
+    }
+  } ]
+} ]
+
+def global2cyjs(soup):
+    #entries = soup.find_all('entry')
+    nodes = []
+    edges = []
+    elements = {}
+    compounds = soup.find_all('entry', attrs={"type": "compound"})
+    reactions = soup.find_all('reaction')
+    for c in compounds:
+        g = c.find("graphics")
+        data = {}
+        data['id'] = c['id']
+        data['label'] = g['name']
+        data['fgcolor'] = g['fgcolor']
+        data['bgcolor'] = g['bgcolor']
+        data['type'] = g['type']
+        data['width'] = g['width']
+        data['height'] = g['height']
+        data['x'] = g['x']
+        data['y'] = g['y']
+        node = {'data':data, 'position':{'x':int(g['x']), 'y':int(g['y'])}, 'selected': 'false'}
+        nodes.append(node)
+    elements['nodes'] = nodes
+    for r in reactions:
+        
+    elements['edges'] = edges
+    return elements
+    # print(len(entries))
+    # print(len(reactions))
+
 def kegg2cyjs(identifier):
     kgml = requests.get(API_BASE + 'get/' + identifier + '/kgml').content
     soup = BeautifulSoup(kgml, "xml")
+    if identifier[3:] in GLOBAL_PATHWAY_IDS:
+        return global2cyjs(soup)
+    
     entries = soup.find_all('entry')
-    d = {}
+
     elements = {}
     nodes = []
     edges = []
+
     for e in entries:
         g = e.find("graphics")
         data = {}
@@ -148,8 +244,6 @@ def kegg2cyjs(identifier):
 
     elements["nodes"] = nodes
     elements["edges"] = edges
-    # d["elements"] = elements
-    # return json.dumps(d, indent=4)
     return elements
 
 def nodes2df(nodes):
@@ -157,3 +251,10 @@ def nodes2df(nodes):
     for n in nodes:
         rows.append(pd.Series(n['data']))
     return pd.DataFrame(rows)
+
+def cyjs2file(cyjs, filename):
+    d = {}
+    d["elements"] = cyjs
+    print(json.dumps(d, indent=4), file=open(filename,'w'))
+    print("wrote " + filename)
+    # return json.dumps(d, indent=4)
