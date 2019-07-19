@@ -210,6 +210,7 @@ def kegg2cyjs(identifier):
         g = e.find("graphics")
         data = {}
         data["id"] = e["id"]
+        data['keggids'] = e['name']
         if e["type"] != "group":
             data["label"] = g["name"].split(", ")[0]
             data["name"] = g["name"]
