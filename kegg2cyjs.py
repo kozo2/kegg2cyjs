@@ -211,6 +211,7 @@ def kegg2cyjs(identifier):
         data = {}
         data["id"] = e["id"]
         data['keggids'] = e['name']
+        data['keggtype'] = e['type']
         if e["type"] != "group":
             data["label"] = g["name"].split(", ")[0]
             data["name"] = g["name"]
