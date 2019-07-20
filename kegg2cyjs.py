@@ -152,6 +152,12 @@ def global2cyjs(soup):
     elements = {}
     compounds = soup.find_all('entry', attrs={"type": "compound"})
     reactions = soup.find_all('reaction')
+    
+    edgeid2gene = {}
+    genes = soup.find_all('entry', attrs={'type': 'gene'})
+    for gene in genes:
+        edgeid2gene[gene['id']] = gene['name']
+
     for c in compounds:
         g = c.find("graphics")
         data = {}
@@ -168,26 +174,41 @@ def global2cyjs(soup):
         nodes.append(node)
     elements['nodes'] = nodes
 
-    s2t = []
     for r in reactions:
         substrates = r.find_all('substrate')
         products = r.find_all('product')
-        rids = r["name"].replace("rn:", "")
-        data = {}
+        edgeid = r['id']
         for s in substrates:
             for p in products:
-                s2t.append([s['id'], p['id']])
-                # data['source'] = s['id']
-                # data['target'] = p['id']
-                # edge = {'data':data}
-                # edges.append(edge)
+                ed = {}
+                ed['source'] = s['id']
+                ed['target'] = p['id']
+                ed['id'] = edgeid
+                ed['genes'] = edgeid2gene[edgeid]
+                edge = {'data':ed}
+                edges.append(edge)
+    # s2t_id = []
+    # for r in reactions:
+    #     substrates = r.find_all('substrate')
+    #     products = r.find_all('product')
+    #     rids = r["name"].replace("rn:", "")
+    #     edgeid = r['id']
+    #     # data = {}
+    #     for s in substrates:
+    #         for p in products:
+    #             s2t_id.append([s['id'], p['id'], edgeid])
+    #             # data['source'] = s['id']
+    #             # data['target'] = p['id']
+    #             # edge = {'data':data}
+    #             # edges.append(edge)
     
-    for st in set(frozenset(i) for i in s2t):
-        data = {}
-        data['source'] = list(st)[0]
-        data['target'] = list(st)[1]
-        edge = {'data':data}
-        edges.append(edge)
+    # for stid in set(frozenset(i) for i in s2t_id):
+    #     data = {}
+    #     data['source'] = list(stid)[0]
+    #     data['target'] = list(stid)[1]
+    #     data['genes'] = edgeid2gene[list(stid)[2]]
+    #     edge = {'data':data}
+    #     edges.append(edge)
     elements['edges'] = edges
 
     return elements
